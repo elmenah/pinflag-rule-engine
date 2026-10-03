@@ -1,0 +1,42 @@
+CREATE EXTENSION IF NOT EXISTS "pgcrypto";
+
+CREATE TABLE brands (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  name VARCHAR(255) NOT NULL,
+  base_config JSONB NOT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE rules (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+
+  brand_id UUID NOT NULL REFERENCES brands(id),
+
+  name VARCHAR(255) NOT NULL,
+
+  conditions JSONB NOT NULL,
+
+  action JSONB NOT NULL,
+
+  priority INTEGER NOT NULL DEFAULT 0,
+
+  enabled BOOLEAN NOT NULL DEFAULT true,
+
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE decisions (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+
+  brand_id UUID NOT NULL REFERENCES brands(id),
+
+  order_data JSONB NOT NULL,
+
+  result JSONB NOT NULL,
+
+  trace JSONB NOT NULL,
+
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);

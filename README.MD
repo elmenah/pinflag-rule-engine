@@ -22,16 +22,54 @@ El sistema permite configurar reglas por marca para determinar el courier, preci
 ## Arquitectura
 
 ```text
-React
-  │
-  │ HTTP / JSON
-  ▼
-Express API
-  │
-  ├── Rule Engine
-  │
-  ▼
-PostgreSQL
+┌───────────────┐
+│     React     │
+│  Simulación   │
+└───────┬───────┘
+        │ POST /simulations
+        ▼
+┌───────────────┐
+│  Express API  │
+│   Validación  │
+└───────┬───────┘
+        │
+        ├──────────────► PostgreSQL
+        │                - Configuración base
+        │                - Reglas activas
+        │
+        ▼
+┌──────────────────────┐
+│     Rule Engine      │
+│                      │
+│ Evaluar condiciones  │
+│         ↓            │
+│ Reglas coincidentes  │
+│         ↓            │
+│ Agrupar por target   │
+│         ↓            │
+│ Resolver prioridad   │
+│    y conflictos      │
+│         ↓            │
+│ Aplicar ganadoras    │
+└──────────┬───────────┘
+           │
+           ▼
+     Resultado final
+     + explicación
+           │
+           ▼
+┌──────────────────────┐
+│     PostgreSQL       │
+│ Guarda decisión      │
+│ + snapshot del trace │
+└──────────┬───────────┘
+           │
+           ▼
+      Express API
+           │
+           ▼
+         React
+   muestra la decisión
 ```
 
 El Rule Engine está separado de las rutas HTTP para que la lógica de evaluación pueda probarse independientemente de Express y PostgreSQL.
